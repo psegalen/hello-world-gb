@@ -50,3 +50,16 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Game Boy compilation intermediate files
+*.sym
+*.rel
+*.asm
+*.lst
+*.ihx
+*.lk
+*.noi
+
+# Game Boy tools tmp files
+*.sna
+*.ini
