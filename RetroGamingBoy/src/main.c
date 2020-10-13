@@ -1,6 +1,9 @@
 #include <gb/gb.h>
 #include "./splashscreen.tileset.h"
 #include "./splashscreen.tilemap.h"
+#include "./logo_rgb.tileset.h"
+#include "./logo_rgb.tilemap.h"
+#include "./text.h"
 
 #define WHITE  0
 #define SILVER 1
@@ -47,7 +50,21 @@ void splashScreen(void) {
     wait_frames(5);   // ~ 0.08s
 }
 
+void homeScreen(void) {
+    BGP_REG = PALETTE(WHITE, SILVER, GRAY, BLACK);
+    set_bkg_data(0, LOGO_RGB_TS_TILE_COUNT, LOGO_RGB_TS);
+    set_bkg_tiles(0, 0, LOGO_RGB_TM_WIDTH, LOGO_RGB_TM_HEIGHT, LOGO_RGB_TM);
+    SHOW_BKG;
+
+    // TEXT
+    textLoadFont();
+    textPrintCharBkg(2, 2, 'à');
+}
+
 void main(void) {
     // Display the splash screen
-    splashScreen();
+    // splashScreen();
+
+    // Display the home screen
+    homeScreen();
 }
