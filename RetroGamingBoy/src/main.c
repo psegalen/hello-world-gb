@@ -12,8 +12,11 @@
 
 #define PALETTE(c0, c1, c2, c3) c0 | c1 << 2 | c2 << 4 | c3 << 6
 
-void wait_frames(INT8 count) {
+UINT8 waitFramesOrKeys(INT8 count) {
+    UINT8 keys = 0;
     while (count) {
+        keys = joypad();
+        if (keys) return keys;
         count -= 1;
         wait_vbl_done();
     }
@@ -26,39 +29,56 @@ void splashScreen(void) {
     
     // Black screen (initial state)
     BGP_REG = PALETTE(WHITE, WHITE, WHITE, WHITE);
-    wait_frames(60);  // ~ 1s
+    waitFramesOrKeys(60);  // ~ 1s
 
     // Fade-in
     BGP_REG = PALETTE(WHITE, WHITE, WHITE, WHITE);
-    wait_frames(5);   // ~ 0.08s
+    waitFramesOrKeys(5);   // ~ 0.08s
     BGP_REG = PALETTE(WHITE, WHITE, WHITE, SILVER);
-    wait_frames(5);   // ~ 0.08s
+    waitFramesOrKeys(5);   // ~ 0.08s
     BGP_REG = PALETTE(WHITE, WHITE, SILVER, GRAY);
-    wait_frames(5);   // ~ 0.08s
+    waitFramesOrKeys(5);   // ~ 0.08s
     BGP_REG = PALETTE(WHITE, SILVER, GRAY, BLACK);
 
-    wait_frames(120);  // ~ 2s
+    waitFramesOrKeys(120);  // ~ 2s
 
     // Fade-out (inverted color)
     BGP_REG = PALETTE(WHITE, SILVER, GRAY, BLACK);
-    wait_frames(5);   // ~ 0.08s
+    waitFramesOrKeys(5);   // ~ 0.08s
     BGP_REG = PALETTE(WHITE, WHITE, SILVER, GRAY);
-    wait_frames(5);   // ~ 0.08s
+    waitFramesOrKeys(5);   // ~ 0.08s
     BGP_REG = PALETTE(WHITE, WHITE, WHITE, SILVER);
-    wait_frames(5);   // ~ 0.08s
+    waitFramesOrKeys(5);   // ~ 0.08s
     BGP_REG = PALETTE(WHITE, WHITE, WHITE, WHITE);
-    wait_frames(5);   // ~ 0.08s
+    waitFramesOrKeys(5);   // ~ 0.08s
 }
 
 void homeScreen(void) {
+    SHOW_BKG;
+    SHOW_WIN;
     BGP_REG = PALETTE(WHITE, SILVER, GRAY, BLACK);
+
+    // Logo RGB
     set_bkg_data(0, LOGO_RGB_TS_TILE_COUNT, LOGO_RGB_TS);
     set_bkg_tiles(0, 0, LOGO_RGB_TM_WIDTH, LOGO_RGB_TM_HEIGHT, LOGO_RGB_TM);
-    SHOW_BKG;
 
     // TEXT
     textLoadFont();
-    textPrintCharBkg(2, 2, 'à');
+    move_win(0, 16*8);
+    textPrintStringWin(5, 0, "Press Start!");
+
+    UINT8 key = 0;
+    
+    while (1) {
+        if (waitFramesOrKeys(50)) {
+            break;
+        }
+        HIDE_WIN;
+        if (waitFramesOrKeys(20)) {
+            break;
+        }
+        SHOW_WIN;
+    }
 }
 
 void main(void) {
@@ -67,4 +87,7 @@ void main(void) {
 
     // Display the home screen
     homeScreen();
+
+    SHOW_WIN;
+    textPrintStringWin(5, 0, "     OK!     ");
 }
