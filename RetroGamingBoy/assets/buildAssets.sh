@@ -35,3 +35,18 @@
     --output-header-file=../src/font.tileset.h \
     --name=FONT_TS \
     ./font.png
+
+./img2gb.exe tileset \
+    --output-c-file=../src/studio.tileset.c \
+    --output-header-file=../src/studio.tileset.h \
+    --output-image=../src/studio.tileset.png \
+    --deduplicate \
+    --name=STUDIO_TS \
+    ./studio/studio.png
+
+./img2gb.exe tilemap \
+    --output-c-file=../src/studio.tilemap.c \
+    --output-header-file=../src/studio.tilemap.h \
+    ../src/studio.tileset.png \
+    --name=STUDIO_TM \
+    ./studio/studio.png
