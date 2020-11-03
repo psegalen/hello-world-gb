@@ -3,7 +3,10 @@
 #include "./splashscreen.tilemap.h"
 #include "./logo_rgb.tileset.h"
 #include "./logo_rgb.tilemap.h"
+#include "./studio.tileset.h"
+#include "./studio.tilemap.h"
 #include "./text.h"
+#include "./sprites/player.sprite.h"
 
 #define WHITE  0
 #define SILVER 1
@@ -81,13 +84,42 @@ void homeScreen(void) {
     }
 }
 
+void clearScreen(void) {
+    UINT8 line[32] = {_TEXT_CHAR_SPACE};
+    UINT8 y = 32;
+    while (y) {
+        y -= 1;
+        set_bkg_tiles(0, y, 32, 1, line);
+    }
+}
+
+void displayMap(void) {
+    HIDE_BKG;
+    HIDE_WIN;
+    
+    set_bkg_data(0, STUDIO_TS_TILE_COUNT, STUDIO_TS);
+    set_bkg_tiles(0, 0, STUDIO_TM_WIDTH, STUDIO_TM_HEIGHT, STUDIO_TM);
+    SHOW_BKG;
+}
+
+void showSprite(void) {
+    set_sprite_data(0, PLAYER_SPRITES_TILE_COUNT, PLAYER_SPRITES);
+    set_sprite_tile(0, 0);
+    set_sprite_tile(1, 2);
+    SPRITES_8x16;
+    SHOW_SPRITES;
+    move_sprite(0, 32, 128);
+    move_sprite(1, 40, 128);
+}
+
 void main(void) {
     // Display the splash screen
-    // splashScreen();
+    splashScreen();
 
     // Display the home screen
     homeScreen();
 
-    SHOW_WIN;
-    textPrintStringWin(5, 0, "     OK!     ");
+    displayMap();
+
+    showSprite();
 }
