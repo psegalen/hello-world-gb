@@ -15,6 +15,9 @@
 
 #define PALETTE(c0, c1, c2, c3) c0 | c1 << 2 | c2 << 4 | c3 << 6
 
+UINT8 playerX;
+UINT8 playerY;
+
 UINT8 waitFramesOrKeys(INT8 count) {
     UINT8 keys = 0;
     while (count) {
@@ -102,14 +105,36 @@ void displayMap(void) {
     SHOW_BKG;
 }
 
-void showSprite(void) {
+void moveMetaSprite(UINT8 dX, UINT8 dY) {
+    playerX += dX;
+    playerY += dY;
+    move_sprite(0, playerX, playerY);
+    move_sprite(1, playerX +8, playerY);
+}
+
+void rpgInit(void) {
     set_sprite_data(0, PLAYER_SPRITES_TILE_COUNT, PLAYER_SPRITES);
     set_sprite_tile(0, 0);
     set_sprite_tile(1, 2);
     SPRITES_8x16;
     SHOW_SPRITES;
-    move_sprite(0, 32, 128);
-    move_sprite(1, 40, 128);
+    playerX = 32;
+    playerY = 128;
+    moveMetaSprite(0, 0);
+    set_sprite_prop(0, get_sprite_prop(0) | S_PALETTE);
+    set_sprite_prop(1, get_sprite_prop(1) | S_PALETTE);
+}
+
+void rpgMain(void) {
+    UINT8 keys = 0;
+    while(1) {
+        keys = joypad();
+        if (keys & J_UP) moveMetaSprite(0, -1);
+        if (keys & J_DOWN) moveMetaSprite(0, +1);
+        if (keys & J_LEFT) moveMetaSprite(-1, 0);
+        if (keys & J_RIGHT) moveMetaSprite(+1, 0);
+        wait_vbl_done();   
+    }
 }
 
 void main(void) {
@@ -121,5 +146,7 @@ void main(void) {
 
     displayMap();
 
-    // showSprite();
+    rpgInit();
+    
+    rpgMain();
 }
