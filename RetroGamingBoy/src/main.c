@@ -6,7 +6,7 @@
 #include "./studio.tileset.h"
 #include "./studio.tilemap.h"
 #include "./text.h"
-#include "./sprites/player.sprite.h"
+#include "./player.sprite.h"
 
 #define WHITE  0
 #define SILVER 1
