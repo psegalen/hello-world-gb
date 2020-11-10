@@ -63,3 +63,6 @@ dkms.conf
 # Game Boy tools tmp files
 *.sna
 *.ini
+
+# Python virtual env
+__env__
