@@ -121,5 +121,5 @@ void main(void) {
 
     displayMap();
 
-    showSprite();
+    // showSprite();
 }
