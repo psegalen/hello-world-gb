@@ -15,8 +15,24 @@
 
 #define PALETTE(c0, c1, c2, c3) c0 | c1 << 2 | c2 << 4 | c3 << 6
 
+
+// Constantes sprites
+UINT8 PLAYER_ANIMATION_RIGHT[] = {24, 28, 24, 32};
+UINT8 PLAYER_ANIMATION_TOP[] = {12, 16, 12, 20};
+UINT8 PLAYER_ANIMATION_BOTTOM[] = {0, 4, 0, 8};
+#define PLAYER_DIRECTION_RIGHT   0
+#define PLAYER_DIRECTION_LEFT    1
+#define PLAYER_DIRECTION_TOP     2
+#define PLAYER_DIRECTION_BOTTOM  3
+
+// Variables d'état
 UINT8 playerX;
 UINT8 playerY;
+UINT8 playerAnimationStep = 0;
+UINT8 frameSkip = 8;
+UINT8 playerIsWalking = 0;
+UINT8 playerDirection = PLAYER_DIRECTION_RIGHT;
+UINT8 bkgXPosition = 0;
 
 UINT8 waitFramesOrKeys(INT8 count) {
     UINT8 keys = 0;
@@ -129,10 +145,68 @@ void rpgMain(void) {
     UINT8 keys = 0;
     while(1) {
         keys = joypad();
-        if (keys & J_UP) moveMetaSprite(0, -1);
-        if (keys & J_DOWN) moveMetaSprite(0, +1);
-        if (keys & J_LEFT) moveMetaSprite(-1, 0);
-        if (keys & J_RIGHT) moveMetaSprite(+1, 0);
+        playerIsWalking = 0;
+        if (keys & J_UP) {
+            playerDirection = PLAYER_DIRECTION_TOP;
+            moveMetaSprite(0, -1);
+            playerIsWalking = 1;
+        } else if (keys & J_DOWN) {
+            playerDirection = PLAYER_DIRECTION_BOTTOM;
+            moveMetaSprite(0, +1);
+            playerIsWalking = 1;
+        } else if (keys & J_LEFT) {
+            playerDirection = PLAYER_DIRECTION_LEFT;
+            playerIsWalking = 1;
+            if (bkgXPosition && playerX < 32) {
+                bkgXPosition -= 1;
+            } else {
+                moveMetaSprite(-1, 0);
+            }
+        } else if (keys & J_RIGHT) {
+            playerDirection = PLAYER_DIRECTION_RIGHT;
+            playerIsWalking = 1;
+            if (bkgXPosition < (12 * 8) && playerX > 128 + 8) {
+                bkgXPosition += 1;
+            } else {
+                moveMetaSprite(+1, 0);
+            }
+        }
+        move_bkg(bkgXPosition, 0);
+
+        if (playerIsWalking) {
+            frameSkip -= 1;
+            if (!frameSkip) {
+                switch (playerDirection) {
+                    case PLAYER_DIRECTION_LEFT:
+                        set_sprite_prop(0, get_sprite_prop(0) | S_FLIPX);
+                        set_sprite_prop(1, get_sprite_prop(1) | S_FLIPX);
+                        set_sprite_tile(1, PLAYER_ANIMATION_RIGHT[playerAnimationStep]);
+                        set_sprite_tile(0, PLAYER_ANIMATION_RIGHT[playerAnimationStep] + 2);
+                        break;
+                    case PLAYER_DIRECTION_RIGHT:
+                        set_sprite_prop(0, get_sprite_prop(0) & ~S_FLIPX);
+                        set_sprite_prop(1, get_sprite_prop(1) & ~S_FLIPX);
+                        set_sprite_tile(0, PLAYER_ANIMATION_RIGHT[playerAnimationStep]);
+                        set_sprite_tile(1, PLAYER_ANIMATION_RIGHT[playerAnimationStep] + 2);
+                        break;
+                    case PLAYER_DIRECTION_TOP:
+                        set_sprite_prop(0, get_sprite_prop(0) & ~S_FLIPX);
+                        set_sprite_prop(1, get_sprite_prop(1) & ~S_FLIPX);
+                        set_sprite_tile(0, PLAYER_ANIMATION_TOP[playerAnimationStep]);
+                        set_sprite_tile(1, PLAYER_ANIMATION_TOP[playerAnimationStep] + 2);
+                        break;
+                    case PLAYER_DIRECTION_BOTTOM:
+                        set_sprite_prop(0, get_sprite_prop(0) & ~S_FLIPX);
+                        set_sprite_prop(1, get_sprite_prop(1) & ~S_FLIPX);
+                        set_sprite_tile(0, PLAYER_ANIMATION_BOTTOM[playerAnimationStep]);
+                        set_sprite_tile(1, PLAYER_ANIMATION_BOTTOM[playerAnimationStep] + 2);
+                        break;
+                }
+                playerAnimationStep = (playerAnimationStep + 1) % 4;
+                frameSkip = 8;
+            }
+        }
+
         wait_vbl_done();   
     }
 }
