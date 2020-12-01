@@ -4,7 +4,7 @@
 #define _STUDIO_TILESET_H
 
 extern const UINT8 STUDIO_TS[];
-#define STUDIO_TS_TILE_COUNT 98
+#define STUDIO_TS_TILE_COUNT 192
 
 
 #endif
