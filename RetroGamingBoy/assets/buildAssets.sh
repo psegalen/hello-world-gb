@@ -24,6 +24,8 @@ if [ ! -f $IMG2GB ] ; then
     IMG2GB="python -m img2gb"
 fi
 
+echo "Generating Splash Screen tileset and tilemap"
+
 $IMG2GB tileset \
     --output-c-file=../src/splashscreen.tileset.c \
     --output-header-file=../src/splashscreen.tileset.h \
@@ -35,9 +37,11 @@ $IMG2GB tileset \
 $IMG2GB tilemap \
     --output-c-file=../src/splashscreen.tilemap.c \
     --output-header-file=../src/splashscreen.tilemap.h \
-    ../src/splashscreen.tileset.png \
     --name=SPLASH_TM \
+    ../src/splashscreen.tileset.png \
     ./splash.png
+
+echo "Generating Logo tileset and tilemap"
 
 $IMG2GB tileset \
     --output-c-file=../src/logo_rgb.tileset.c \
@@ -50,9 +54,11 @@ $IMG2GB tileset \
 $IMG2GB tilemap \
     --output-c-file=../src/logo_rgb.tilemap.c \
     --output-header-file=../src/logo_rgb.tilemap.h \
-    ../src/logo_rgb.tileset.png \
     --name=LOGO_RGB_TM \
+    ../src/logo_rgb.tileset.png \
     ./logo/rgb_gb.v2.png
+
+echo "Generating Font tileset"
 
 $IMG2GB tileset \
     --output-c-file=../src/font.tileset.c \
@@ -60,17 +66,17 @@ $IMG2GB tileset \
     --name=FONT_TS \
     ./font.png
 
+echo "Generating Studio tileset and tilemap"
+
 $IMG2GB tileset \
     --output-c-file=../src/studio.tileset.c \
     --output-header-file=../src/studio.tileset.h \
-    --output-image=../src/studio.tileset.png \
-    --deduplicate \
     --name=STUDIO_TS \
-    ./studio/studio.png
+    ./studio/studio.tileset.png
 
 $IMG2GB tilemap \
     --output-c-file=../src/studio.tilemap.c \
     --output-header-file=../src/studio.tilemap.h \
-    ../src/studio.tileset.png \
     --name=STUDIO_TM \
+    ./studio/studio.tileset.png \
     ./studio/studio.png
