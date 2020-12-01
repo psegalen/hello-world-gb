@@ -40,7 +40,7 @@ void movePlayer(UINT8 dX, UINT8 dY) {
 
 void rpgInit(void) {
     displayMap();
-    
+
     set_sprite_data(0, PLAYER_SPRITES_TILE_COUNT, PLAYER_SPRITES);
     set_sprite_tile(0, 0);
     set_sprite_tile(1, 2);
@@ -64,14 +64,16 @@ void rpgMain(void) {
             playerIsWalking = 1;
         } else if (keys & J_DOWN) {
             playerDirection = PLAYER_DIRECTION_BOTTOM;
-            movePlayer(0, +1);
+            if (playerY <= (18 * 8) - 1) {
+                movePlayer(0, +1);
+            }
             playerIsWalking = 1;
         } else if (keys & J_LEFT) {
             playerDirection = PLAYER_DIRECTION_LEFT;
             playerIsWalking = 1;
             if (bkgXPosition && playerX < 32) {
                 bkgXPosition -= 1;
-            } else {
+            } else if (playerX >= 8) {
                 movePlayer(-1, 0);
             }
         } else if (keys & J_RIGHT) {
@@ -79,7 +81,7 @@ void rpgMain(void) {
             playerIsWalking = 1;
             if (bkgXPosition < (12 * 8) && playerX > 128 + 8) {
                 bkgXPosition += 1;
-            } else {
+            } else if (playerX <= (20 * 8) - 8) {
                 movePlayer(+1, 0);
             }
         }
