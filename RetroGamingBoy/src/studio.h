@@ -3,7 +3,7 @@
 
 void displayMap(void);
 
-void movePlayer(UINT8 dX, UINT8 dY);
+void movePlayer(INT8 dX, INT8 dY);
 
 void rpgInit(void);
 
