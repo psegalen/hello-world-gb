@@ -3,6 +3,8 @@
 #include "./studio.tilemap.h"
 #include "./player.sprite.h"
 #include "./helpers.h"
+#include "./studio.h"
+#include "./text.h"
 
 // Constantes sprites
 UINT8 PLAYER_ANIMATION_RIGHT[] = {24, 28, 24, 32};
@@ -23,6 +25,9 @@ UINT8 frameSkip = 8;
 UINT8 playerDirection = PLAYER_DIRECTION_BOTTOM;
 UINT8 bkgXPosition = 0;
 
+const UINT8 DELIMITER_LINE[20] = {_TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER, _TEXT_CHAR_BORDER};
+const UINT8 BLANK_LINE[20] = {_TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE, _TEXT_CHAR_SPACE};
+
 void displayMap(void) {
     HIDE_BKG;
     HIDE_WIN;
@@ -39,10 +44,11 @@ UINT8 playerCanGo(INT8 dX, INT8 dY) {
 
     UINT8 cx = (playerWorldX + dX) * 2;
     UINT8 cy = (playerWorldY + dY) * 2;
-    UINT8 tile;
-    get_bkg_tiles(cx, cy, 1, 1, &tile);
+    UINT8 tiles[4];
+    get_bkg_tiles(cx, cy, 2, 2, tiles);
 
-    return tile <= 0x1F;
+    return tiles[0] <= 0x1F && tiles[1] <= 0x1F
+        && tiles[2] <= 0x1F && tiles[3] <= 0x1F;
 }
 
 void movePlayer(INT8 dX, INT8 dY) {
@@ -119,10 +125,13 @@ void rpgInit(void) {
     playerScreenY = (playerWorldY * 16) + 16;
     move_sprite(0, playerScreenX, playerScreenY);
     move_sprite(1, playerScreenX +8, playerScreenY);
+
+    textLoadFont();
 }
 
 void rpgMain(void) {
     UINT8 keys = 0;
+    showMessage("Hello\nWorld!\nHow are you\neverybody?");
     while(1) {
         keys = joypad();
         if (keys & J_UP) {
@@ -137,8 +146,73 @@ void rpgMain(void) {
         } else if (keys & J_RIGHT) {
             playerDirection = PLAYER_DIRECTION_RIGHT;
             movePlayer(+1, 0);
+        } else if (keys & J_B) {
+            showMessage("Hello\nWorld!\nHow are you\neverybody?");
         }
 
-        wait_vbl_done();   
+        wait_vbl_done();
     }
+}
+
+void clearMessageBox(void) {
+    set_win_tiles(0, 0, 20, 1, DELIMITER_LINE);
+    set_win_tiles(0, 1, 20, 1, BLANK_LINE);
+    set_win_tiles(0, 2, 20, 1, BLANK_LINE);
+    set_win_tiles(0, 3, 20, 1, BLANK_LINE);
+}
+
+void showMessagBox(void) {
+    move_win(7, MESSAGE_BOX_INITIAL_Y);
+    SHOW_WIN;
+    for(UINT8 y = MESSAGE_BOX_INITIAL_Y; y >= MESSAGE_BOX_FINAL_Y; y -= 1) {
+        move_win(7, y);
+        wait_vbl_done();
+    }
+}
+
+void hideMessageBox(void) {
+    move_win(7, MESSAGE_BOX_FINAL_Y);
+    for(UINT8 y = MESSAGE_BOX_FINAL_Y; y <= MESSAGE_BOX_INITIAL_Y; y += 1) {
+        move_win(7, y);
+        wait_vbl_done();
+    }
+    HIDE_WIN;
+}
+
+void showMessage(unsigned char* message) {
+    clearMessageBox();
+    showMessagBox();
+
+    UINT8 offsetX = 1;
+    UINT8 offsetY = 1;
+    UINT8 newline = 2;
+
+    while (message[0]) {
+        if (message[0] == '\n') {
+            offsetX = 1;
+            offsetY += 1;
+            newline -= 1;
+        } else {
+            textPrintCharWin(offsetX, offsetY, message[0]);
+            offsetX += 1;
+        }
+
+        if (!newline) {
+            while(!(joypad() & J_A)) {
+                wait_vbl_done();
+            }
+            clearMessageBox();
+            offsetX = 1;
+            offsetY = 1;
+            newline = 2;
+        }
+        message += 1;
+        wait_vbl_done();
+    }
+
+    while(!(joypad() & J_A)) {
+        wait_vbl_done();
+    }
+
+    hideMessageBox();
 }
